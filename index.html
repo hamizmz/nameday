@@ -5,12 +5,141 @@
     <title>Μαρία!</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <style type="text/css">
-    
+      body {
+        display:flex;
+        justify-content:center;
+        align-items:center;
+
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        overflow:hidden;
+        margin:0;
+        padding:0;
+      }
+
+      img {
+        position:absolute;
+        top:0;
+        left:0;
+        z-index:-1;
+      }
+
+      h1 {
+        margin;0;
+        padding:0;
+        font-size:15vw;
+        color:white;
+        text-shadow:2pt 2pt 0 rgba(0, 0, 0, 0.6);
+      }
     </style>
   </head>
   <body>
     <h1>Μαρία</h1>
     <img src="giphy.gif" />
-    <script type="text/javascript"></script>
+    <script type="text/javascript">
+      var _title = document.getElementsByTagName("h1")[0];
+      var ON_INTERVAL = 2000; // ms
+      var OFF_INTERVAL = 500; // ms
+
+      var _state = 1; // 1 - on | 0 - off
+      var _stamp = Date.now();
+
+      function turn_on() {
+        _state = 1;
+        _stamp = Date.now();
+
+        _title.style.opacity = 1;
+      };
+
+      function turn_off() {
+        _state = 0;
+        _stamp = Date.now();
+
+        _title.style.opacity = 0;
+      };
+
+      function flash_text() {
+        var diff = Date.now() - _stamp;
+
+        if (_state && diff >= ON_INTERVAL)
+          turn_off();
+        else if (!_state && diff >= OFF_INTERVAL)
+          turn_on();
+
+        window.requestAnimationFrame(flash_text);
+      };
+
+      window.requestAnimationFrame(flash_text);
+    </script>
+
+    <script type="text/javascript">
+      var _img = get_box(document.getElementsByTagName("img")[0]);
+
+      function get_dims(el) {
+        return el.getClientRects();
+      };
+
+      function get_ratio(dims) {
+        return dims.width / dims.height;
+      };
+
+      function get_box(el) {
+        let dims = get_dims(el)[0];
+        return {
+          el: el,
+          dims: dims,
+          ratio: get_ratio(dims)
+        };
+      };
+
+      function set_height(img) {
+        img.style.width = null;
+        img.style.height = "100%";
+      };
+
+      function set_width(img) {
+        img.style.width = "100%";
+        img.style.height = null;
+      };
+
+      function render_px(val) {
+        return -val + "px";
+      };
+
+      function set_xy(img, x, y) {
+        console.log(x, y);
+        img.style.top = render_px(y);
+        img.style.left = render_px(x);
+      };
+
+      function find_center(a, b) {
+        return (b - a) / 2;
+      };
+
+      function center(img, container) {
+        console.log(img.el.offsetWidth, img.el.offsetHeight, container.dims);
+        set_xy(img.el,
+               find_center(container.dims.width, img.el.offsetWidth),
+               find_center(container.dims.height, img.el.offsetHeight)
+              );
+      };
+
+      function fit_image() {
+        let body = get_box(document.body);
+
+        if (_img.ratio >= body.ratio)
+          set_height(_img.el);
+        else
+          set_width(_img.el);
+
+        center(_img, body);
+      };
+
+      window.addEventListener("resize", fit_image);
+      fit_image();
+    </script>
   </body>
 </html>
